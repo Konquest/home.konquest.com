@@ -1,4 +1,5 @@
 var express = require('express')
+var winston = require('winston')
 
 var db = require('database')
 var Controller = require('util/controller')
@@ -7,7 +8,13 @@ var router = module.exports = express.Router()
 
 var doorController = new Controller({
   model: db.Door,
-  key: 'door'
+  key: 'door',
+  errorLogger: winston.error
+})
+
+router.use(function (req, res, next) {
+  res.tags.push('doors')
+  next()
 })
 
 // Parse ID

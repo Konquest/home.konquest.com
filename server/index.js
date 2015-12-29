@@ -7,18 +7,22 @@ var cors = require('cors')
 var express = require('express')
 var routes = require('./routes')
 var errorHandler = require('./middleware/error-handler')
-
+var logger = require('./middleware/logger')
+var access = require('./middleware/access')
 
 var Server = function() {
   var app = express()
 
   app.set('x-powered-by', false)
+  app.set('trust proxy', process.env.TRUST_PROXY.toLowerCase() === 'true')
   app.use(compression())
+  app.use(logger)
   app.use(helmet.xframe())
   app.use(helmet.nosniff())
   app.use(cors())
   app.use(bodyParser.urlencoded({extended: true}))
   app.use(bodyParser.json())
+  app.use(access)
 
   routes(app)
 

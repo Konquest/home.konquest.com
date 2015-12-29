@@ -15,7 +15,6 @@ var Controller = module.exports = function (options) {
   opts.show = opts.show || {}
   opts.update = opts.update || {}
   opts.delete = opts.delete || {}
-  opts.errorLogger = opts.errorLogger || console.error
 
   // Validation
   if (!opts.model) {
@@ -43,19 +42,11 @@ var Controller = module.exports = function (options) {
       .end()
   }
   opts.onError = function (err, req, res, next) {
-    var response = {
-      code: err.code,
-      message: err.message
-    }
-
     if (err instanceof ValidationError) {
-      res.status(400)
-      response.errors = err.errors
-    } else {
-      this.options.errorLogger(err.stack)
+      err.status = 400
     }
 
-    res.send(response)
+    next(err)
   }.bind(this)
   opts.onSuccess = function (record, req, res, next) {
     res.send(record.toJson())

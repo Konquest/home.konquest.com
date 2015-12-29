@@ -1,6 +1,9 @@
 var dotenv = require('dotenv')
 dotenv.load()
 
+var winston = require('winston')
+winston.level = 'error'
+
 var db = require('database')
 
 describe('Home', function () {
