@@ -110,11 +110,14 @@ Controller.prototype.list = function (req, res, next) {
 Controller.prototype.create = function (req, res, next) {
   var self = this
   this.options.model.create(req.body)
-    .then(function (records) {
+    .then(function (record) {
+      return record.reload()
+    })
+    .then(function (record) {
       if (self.options.create.onSuccess) {
-        self.options.create.onSuccess(records, req, res, next)
+        self.options.create.onSuccess(record, req, res, next)
       } else {
-        self.options.onSuccess(records, req, res, next)
+        self.options.onSuccess(record, req, res, next)
       }
     })
     .catch(function (err) {
@@ -145,6 +148,9 @@ Controller.prototype.update = function (req, res, next) {
 
   var self = this
   res.locals[this.options.key].update(req.body, {limit: 1})
+    .then(function (record) {
+      return record.reload()
+    })
     .then(function (record) {
       if (self.options.update.onSuccess) {
         self.options.update.onSuccess(record, req, res, next)
