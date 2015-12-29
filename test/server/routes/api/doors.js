@@ -35,6 +35,7 @@ describe('Doors', function() {
     it('should list', function (done) {
       request(server)
         .get('/api/doors')
+        .set('Access-Key', 'qwerty')
         .expect(200)
         .end(function (err, res) {
           assert.ifError(err)
@@ -57,6 +58,7 @@ describe('Doors', function() {
 
       request(server)
         .post('/api/doors')
+        .set('Access-Key', 'qwerty')
         .send(newDoor)
         .expect(201)
         .end(function (err, res) {
@@ -75,6 +77,7 @@ describe('Doors', function() {
     it('should show by id', function (done) {
       request(server)
         .get('/api/doors/' + doors[0].id)
+        .set('Access-Key', 'qwerty')
         .expect(200)
         .end(function (err, res) {
           assert.ifError(err)
@@ -90,6 +93,7 @@ describe('Doors', function() {
     it('should show by slug', function (done) {
       request(server)
         .get('/api/doors/' + doors[0].slug)
+        .set('Access-Key', 'qwerty')
         .expect(200)
         .end(function (err, res) {
           assert.ifError(err)
@@ -111,6 +115,7 @@ describe('Doors', function() {
 
       request(server)
         .put('/api/doors/' + doors[0].id)
+        .set('Access-Key', 'qwerty')
         .send({ isOpen: changedIsOpen })
         .expect(200)
         .end(function (err, res) {
@@ -132,6 +137,7 @@ describe('Doors', function() {
     it('should destroy', function (done) {
       request(server)
         .delete('/api/doors/' + doors[0].id)
+        .set('Access-Key', 'qwerty')
         .expect(200)
         .end(function (err, res) {
           assert.ifError(err)
