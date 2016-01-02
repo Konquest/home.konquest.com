@@ -13,15 +13,6 @@ module.exports = function (sequelize, DataTypes) {
     instanceMethods: {
       slugify: function () {
         return unidecode(this.name).trim().toLowerCase().replace(/\W+/g, '-').replace(/^-|-$/g, '')
-      },
-
-      toJson: function () {
-        return {
-          id: this.id,
-          name: this.name,
-          slug: this.slug,
-          isOpen: this.isOpen
-        }
       }
     },
 

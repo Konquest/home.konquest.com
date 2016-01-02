@@ -71,6 +71,33 @@ describe('Doors', function() {
           done()
         })
     })
+
+    it('should trigger event doors:created', function (done) {
+      var newDoor = fake.door()
+      var triggered = false
+
+      request(server)
+        .post('/api/doors')
+        .set('Access-Key', 'qwerty')
+        .send(newDoor)
+        .expect(201)
+        .end(function (err, res) {
+          assert.ifError(err)
+
+          triggered.should.equal(true)
+
+          done()
+        })
+
+      var eventBus = server.get('event bus')
+      eventBus.on(['doors', 'created'], function (door) {
+        door.should.be.an.Object
+        door.should.have.property('name').and.equal(newDoor.name)
+        door.should.have.property('isOpen').and.equal(newDoor.isOpen)
+
+        triggered = true
+      })
+    })
   })
 
   describe('GET /api/doors/:door', function () {
@@ -131,6 +158,36 @@ describe('Doors', function() {
           done()
         })
     })
+
+    it('should trigger event doors:changed', function (done) {
+      var changedIsOpen = !doors[0].isOpen
+      var triggered = false
+
+      request(server)
+        .put('/api/doors/' + doors[0].id)
+        .set('Access-Key', 'qwerty')
+        .send({ isOpen: changedIsOpen })
+        .expect(200)
+        .end(function (err, res) {
+          assert.ifError(err)
+
+
+          triggered.should.equal(true)
+          done()
+        })
+
+      var eventBus = server.get('event bus')
+      eventBus.on(['doors', 'changed'], function (door) {
+        door.should.be.an.Object
+        door.should.have.property('id').and.equal(doors[0].id)
+        door.should.have.property('slug').and.equal(doors[0].slug)
+        door.should.have.property('name').and.equal(doors[0].name)
+        door.should.have.property('isOpen').and.not.equal(doors[0].isOpen)
+        door.should.have.property('isOpen').and.equal(changedIsOpen)
+
+        triggered = true
+      })
+    })
   })
 
   describe('DELETE /api/doors/:door', function () {
@@ -146,6 +203,31 @@ describe('Doors', function() {
 
           done()
         })
+    })
+
+    it.skip('should trigger event doors:deleted', function (done) {
+      var triggered = false
+      request(server)
+        .delete('/api/doors/' + doors[0].id)
+        .set('Access-Key', 'qwerty')
+        .expect(200)
+        .end(function (err, res) {
+          assert.ifError(err)
+
+          triggered.should.equal(true)
+
+          done()
+        })
+
+      var eventBus = server.get('event bus')
+      eventBus.on(['doors', 'deleted'], function (door) {
+
+        // console.log(door)
+        door.should.be.an.Object
+        door.should.have.property('id').and.equal(doors[0].id)
+
+        triggered = true
+      })
     })
   })
 })

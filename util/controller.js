@@ -17,6 +17,8 @@ var routify = function (method, obj) {
   model - Sequelize Model class
   key - field to save in `res.locals` hash for single records (create, show, update)
   keys - field to save in `res.locals` hash for multiple records (list)
+
+  Note: Upon update, `{key}_old` will be used to store the old record as JSON
 */
 var Controller = module.exports = function (options) {
   var opts = options || {}
@@ -119,6 +121,9 @@ Controller.prototype.update = function (req, res, next) {
   }
 
   var self = this
+
+  res.locals[this.options.key + '_old'] = JSON.parse(JSON.stringify(res.locals[this.options.key].toJSON())) // Store old record
+
   res.locals[this.options.key].update(req.body, {limit: 1})
     .then(function (record) {
       return record.reload()
@@ -142,6 +147,7 @@ Controller.prototype.delete = function (req, res, next) {
   var self = this
   res.locals[this.options.key].destroy()
     .then(function (record) {
+      // console.log(record.toJSON())
       res.locals[self.options.key] = record
       self.options.onSuccess(record, req, res)
     })

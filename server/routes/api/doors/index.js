@@ -2,6 +2,7 @@ var express = require('express')
 var winston = require('winston')
 
 var db = require('database')
+var hook = require('./hooks')
 var Controller = require('util/controller')
 
 var router = module.exports = express.Router()
@@ -21,11 +22,11 @@ router.use(function (req, res, next) {
 // Door views
 function renderList (req, res, next) {
   res.send(res.locals.doors.map(function (door) {
-    return door.toJson()
+    return door.toJSON()
   }))
 }
 function renderSingle (req, res, next) {
-  res.send(res.locals.door.toJson())
+  res.send(res.locals.door.toJSON())
 }
 function statusCreated (req, res, next) {
   res.status(201)
@@ -39,8 +40,8 @@ function renderEmpty (req, res, next) {
 router.param('door', doorController.param)
 router.route('/')
   .get(doorController.list, renderList)
-  .post(doorController.create, statusCreated, renderSingle)
+  .post(doorController.create, hook.created, statusCreated, renderSingle)
 router.route('/:door')
   .get(doorController.show, renderSingle)
-  .put(doorController.update, renderSingle)
-  .delete(doorController.delete, renderEmpty)
+  .put(doorController.update, hook.changed, renderSingle)
+  .delete(doorController.delete, hook.deleted, renderEmpty)

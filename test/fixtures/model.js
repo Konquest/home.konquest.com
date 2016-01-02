@@ -36,6 +36,9 @@ var Model = module.exports = function (options) {
       (model.error ? reject : resolve)(model.result)
     })
   }
+  this.result.toJSON = function () {
+    return model.result
+  }
 }
 
 Model.prototype = ['findAll', 'findOne', 'create', 'update', 'destroy'].reduce(function (proto, method) {

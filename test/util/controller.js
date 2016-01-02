@@ -17,7 +17,7 @@ var jsonify = function (json) {
 
 describe('Controller Creator', function () {
   it('should create a basic controller', function (done) {
-    var controller = new Controller({ model: {}, key: 'key' })
+    var controller = new Controller({ model: {}, key: 'key', keys: 'keys' })
 
     controller.should.have.property('param').and.is.a.Function
     controller.should.have.property('list').and.is.a.Function
