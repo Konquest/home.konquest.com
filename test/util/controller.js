@@ -31,10 +31,12 @@ describe('Controller Creator', function () {
 
   it('should list all records', function (done) {
     var FakeModel = new Model({ result: [jsonify({foo: 'bar'})] })
-    var controller = new Controller({ model: FakeModel, key: 'record'})
+    var controller = new Controller({ model: FakeModel, key: 'record', keys: 'records'})
     var server = express()
 
-    server.get('/test', controller.list.bind(controller))
+    server.get('/test', controller.list.bind(controller), function (req, res, next) {
+      res.send(res.locals.records)
+    })
 
     request(server)
       .get('/test')
@@ -53,15 +55,17 @@ describe('Controller Creator', function () {
 
   it('should create record', function (done) {
     var FakeModel = new Model({ result: jsonify({foo: 'bar'}) })
-    var controller = new Controller({ model: FakeModel, key: 'record'})
+    var controller = new Controller({ model: FakeModel, key: 'record', keys: 'records'})
     var server = express()
 
-    server.post('/test', controller.create.bind(controller))
+    server.post('/test', controller.create.bind(controller), function (req, res, next) {
+      res.send(res.locals.record)
+    })
 
     request(server)
       .post('/test')
       .send({foo: 'bar'})
-      .expect(201)
+      .expect(200)
       .end(function (err, res) {
         assert.ifError(err)
 
@@ -76,11 +80,13 @@ describe('Controller Creator', function () {
 
   it('should show record using param', function (done) {
     var FakeModel = new Model({ result: jsonify({foo: 'bar'}) })
-    var controller = new Controller({ model: FakeModel, key: 'record'})
+    var controller = new Controller({ model: FakeModel, key: 'record', keys: 'records'})
     var server = express()
 
     server.param('test', controller.param.bind(controller))
-    server.get('/test/:test', controller.show.bind(controller))
+    server.get('/test/:test', controller.show.bind(controller), function (req, res, next) {
+      res.send(res.locals.record)
+    })
 
     request(server)
       .get('/test/:test')
@@ -99,11 +105,13 @@ describe('Controller Creator', function () {
 
   it('should update record', function (done) {
     var FakeModel = new Model({ result: jsonify({foo: 'bar'}) })
-    var controller = new Controller({ model: FakeModel, key: 'record'})
+    var controller = new Controller({ model: FakeModel, key: 'record', keys: 'records'})
     var server = express()
 
     server.param('test', controller.param.bind(controller))
-    server.put('/test/:test', controller.update.bind(controller))
+    server.put('/test/:test', controller.update.bind(controller), function (req, res, next) {
+      res.send(res.locals.record)
+    })
 
     request(server)
       .put('/test/:test')
@@ -123,11 +131,13 @@ describe('Controller Creator', function () {
 
   it('should delete record', function (done) {
     var FakeModel = new Model({ result: jsonify({foo: 'bar'}) })
-    var controller = new Controller({ model: FakeModel, key: 'record'})
+    var controller = new Controller({ model: FakeModel, key: 'record', keys: 'records'})
     var server = express()
 
     server.param('test', controller.param.bind(controller))
-    server.put('/test/:test', controller.delete.bind(controller))
+    server.put('/test/:test', controller.delete.bind(controller), function (req, res, next) {
+      res.send(res.locals.record)
+    })
 
     request(server)
       .put('/test/:test')
@@ -136,7 +146,8 @@ describe('Controller Creator', function () {
       .end(function (err, res) {
         assert.ifError(err)
 
-        res.text.should.equal('')
+        res.body.should.be.an.Object
+        res.body.should.have.property('foo').and.equal('bar')
 
         FakeModel.lastCall.should.equal('destroy')
 

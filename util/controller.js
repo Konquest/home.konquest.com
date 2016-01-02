@@ -12,6 +12,11 @@ var routify = function (method, obj) {
 
 /**
   Creates basic controllers
+
+  Parameters:
+  model - Sequelize Model class
+  key - field to save in `res.locals` hash for single records (create, show, update)
+  keys - field to save in `res.locals` hash for multiple records (list)
 */
 var Controller = module.exports = function (options) {
   var opts = options || {}
@@ -28,34 +33,17 @@ var Controller = module.exports = function (options) {
   if (!opts.key) {
     throw new Error('Missing key paramter.')
   }
+  if (!opts.key) {
+    throw new Error('Missing keys paramter.')
+  }
 
   // Default handlers
-  opts.list.onSuccess = function (records, req, res, next) {
-    var response = records.map(function (record) {
-      return record.toJson()
-    })
-    res.send(response)
-  }
-  opts.create.onSuccess = function (record, req, res, next) {
-    res
-      .status(201)
-      .send(record.toJson())
-  }
-  opts.delete.onSuccess = function (record, req, res, next) {
-    res
-      .status(200)
-      .end()
-  }
-  opts.onError = function (err, req, res, next) {
+  opts.onError = function (err, req, res) {
     if (err instanceof ValidationError) {
       err.status = 400
     }
-
-    next(err)
   }.bind(this)
-  opts.onSuccess = function (record, req, res, next) {
-    res.send(record.toJson())
-  }
+  opts.onSuccess = function (record, req, res) {}
 
   this.options = opts
 
@@ -89,18 +77,13 @@ Controller.prototype.list = function (req, res, next) {
   var self = this
   this.options.model.findAll()
     .then(function (records) {
-      if (self.options.list.onSuccess) {
-        self.options.list.onSuccess(records, req, res, next)
-      } else {
-        self.options.onSuccess(records, req, res, next)
-      }
+      res.locals[self.options.keys] = records
+      self.options.onSuccess(records, req, res)
     })
+    .then(next)
     .catch(function (err) {
-      if (self.options.list.onError) {
-        self.options.list.onError(records, req, res, next)
-      } else {
-        self.options.onError(records, req, res, next)
-      }
+      self.options.onError(records, req, res)
+      next(err)
     })
 }
 
@@ -111,18 +94,13 @@ Controller.prototype.create = function (req, res, next) {
       return record.reload()
     })
     .then(function (record) {
-      if (self.options.create.onSuccess) {
-        self.options.create.onSuccess(record, req, res, next)
-      } else {
-        self.options.onSuccess(record, req, res, next)
-      }
+      res.locals[self.options.key] = record
+      self.options.onSuccess(record, req, res)
     })
+    .then(next)
     .catch(function (err) {
-      if (self.options.create.onError) {
-        self.options.create.onError(err, req, res, next)
-      } else {
-        self.options.onError(err, req, res, next)
-      }
+      self.options.onError(records, req, res)
+      next(err)
     })
 }
 
@@ -131,11 +109,8 @@ Controller.prototype.show = function (req, res, next) {
     return next()
   }
 
-  if (this.options.show.onSuccess) {
-    this.options.show.onSuccess(res.locals[this.options.key], req, res, next)
-  } else {
-    this.options.onSuccess(res.locals[this.options.key], req, res, next)
-  }
+  this.options.onSuccess(res.locals[this.options.key], req, res)
+  next()
 }
 
 Controller.prototype.update = function (req, res, next) {
@@ -149,18 +124,13 @@ Controller.prototype.update = function (req, res, next) {
       return record.reload()
     })
     .then(function (record) {
-      if (self.options.update.onSuccess) {
-        self.options.update.onSuccess(record, req, res, next)
-      } else {
-        self.options.onSuccess(record, req, res, next)
-      }
+      res.locals[self.options.key] = record
+      self.options.onSuccess(record, req, res)
     })
+    .then(next)
     .catch(function (err) {
-      if (self.options.update.onError) {
-        self.options.update.onError(err, req, res, next)
-      } else {
-        self.options.onError(err, req, res, next)
-      }
+      self.options.onError(records, req, res)
+      next(err)
     })
 }
 
@@ -172,17 +142,12 @@ Controller.prototype.delete = function (req, res, next) {
   var self = this
   res.locals[this.options.key].destroy()
     .then(function (record) {
-      if (self.options.delete.onSuccess) {
-        self.options.delete.onSuccess(record, req, res, next)
-      } else {
-        self.options.onSuccess(record, req, res, next)
-      }
+      res.locals[self.options.key] = record
+      self.options.onSuccess(record, req, res)
     })
+    .then(next)
     .catch(function (err) {
-      if (self.options.delete.onError) {
-        self.options.delete.onError(err, req, res, next)
-      } else {
-        self.options.onError(err, req, res, next)
-      }
+      self.options.onError(records, req, res)
+      next(err)
     })
 }
