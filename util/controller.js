@@ -2,8 +2,13 @@ var isUUID = require('util/uuid').isUUID
 var ValidationError = require('sequelize').ValidationError
 
 var routify = function (method, obj) {
-  obj[method] = obj[method].bind(obj)
+  var actualMethod = '_' + method
+  obj[actualMethod] = obj[method] // Backup
+  obj[method] = function () { // Replace
+    return obj[actualMethod].apply(obj, arguments)  // Call real method
+  }
 }
+
 
 /**
   Creates basic controllers
@@ -56,6 +61,7 @@ var Controller = module.exports = function (options) {
 
   // Change functions to be able to be routed in express
   routify('param', this)
+  routify('list', this)
   routify('create', this)
   routify('show', this)
   routify('update', this)

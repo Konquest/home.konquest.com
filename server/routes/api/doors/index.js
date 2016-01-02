@@ -18,13 +18,13 @@ router.use(function (req, res, next) {
 })
 
 // Parse ID
-router.param('door', doorController.param.bind(doorController))
+router.param('door', doorController.param)
 
 router.route('/')
-  .get(doorController.list.bind(doorController))
-  .post(doorController.create.bind(doorController))
+  .get(doorController.list)
+  .post(doorController.create)
 
 router.route('/:door')
-  .get(doorController.show.bind(doorController))
-  .put(doorController.update.bind(doorController))
-  .delete(doorController.delete.bind(doorController))
+  .get(doorController.show)
+  .put(doorController.update)
+  .delete(doorController.delete)
