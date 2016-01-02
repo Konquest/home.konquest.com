@@ -33,7 +33,7 @@ var Controller = module.exports = function (options) {
   if (!opts.key) {
     throw new Error('Missing key paramter.')
   }
-  if (!opts.key) {
+  if (!opts.keys) {
     throw new Error('Missing keys paramter.')
   }
 
@@ -99,7 +99,7 @@ Controller.prototype.create = function (req, res, next) {
     })
     .then(next)
     .catch(function (err) {
-      self.options.onError(records, req, res)
+      self.options.onError(err, req, res)
       next(err)
     })
 }
@@ -129,7 +129,7 @@ Controller.prototype.update = function (req, res, next) {
     })
     .then(next)
     .catch(function (err) {
-      self.options.onError(records, req, res)
+      self.options.onError(err, req, res)
       next(err)
     })
 }
@@ -147,7 +147,7 @@ Controller.prototype.delete = function (req, res, next) {
     })
     .then(next)
     .catch(function (err) {
-      self.options.onError(records, req, res)
+      self.options.onError(err, req, res)
       next(err)
     })
 }

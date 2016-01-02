@@ -8,7 +8,6 @@ var express = require('express')
 var routes = require('./routes')
 var errorHandler = require('./middleware/error-handler')
 var logger = require('./middleware/logger')
-var access = require('./middleware/access')
 
 var Server = function() {
   var app = express()
@@ -22,7 +21,6 @@ var Server = function() {
   app.use(cors())
   app.use(bodyParser.urlencoded({extended: true}))
   app.use(bodyParser.json())
-  app.use(access)
 
   routes(app)
 
