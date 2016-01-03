@@ -22,7 +22,6 @@ exports.changed = function hookChanged (req, res, next) {
 }
 
 exports.deleted = function hookDelete (req, res, next) {
-  // console.log(res.locals.door)
   req.eventBus.emit(['doors', 'deleted'], res.locals.door.toJSON())
   next()
 }

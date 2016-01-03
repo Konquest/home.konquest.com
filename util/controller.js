@@ -147,7 +147,6 @@ Controller.prototype.delete = function (req, res, next) {
   var self = this
   res.locals[this.options.key].destroy()
     .then(function (record) {
-      // console.log(record.toJSON())
       res.locals[self.options.key] = record
       self.options.onSuccess(record, req, res)
     })

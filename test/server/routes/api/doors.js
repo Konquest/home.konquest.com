@@ -205,10 +205,10 @@ describe('Doors', function() {
         })
     })
 
-    it.skip('should trigger event doors:deleted', function (done) {
+    it('should trigger event doors:deleted', function (done) {
       var triggered = false
       request(server)
-        .delete('/api/doors/' + doors[0].id)
+        .delete('/api/doors/' + doors[1].id)
         .set('Access-Key', 'qwerty')
         .expect(200)
         .end(function (err, res) {
@@ -221,10 +221,8 @@ describe('Doors', function() {
 
       var eventBus = server.get('event bus')
       eventBus.on(['doors', 'deleted'], function (door) {
-
-        // console.log(door)
         door.should.be.an.Object
-        door.should.have.property('id').and.equal(doors[0].id)
+        door.should.have.property('id').and.equal(doors[1].id)
 
         triggered = true
       })
