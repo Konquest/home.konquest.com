@@ -16,4 +16,5 @@ describe('Home', function () {
 
   require('./util')
   require('./server')
+  require('./services')
 })
