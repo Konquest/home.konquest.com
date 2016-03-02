@@ -9,11 +9,11 @@ describe('Doors', function() {
   var server
   var doors
 
-  before(function (next) {
+  beforeEach(function () {
     server = new Server()
     doors = fake.doors(10)
 
-    db.Door.destroy({truncate: true})
+    return db.Door.destroy({truncate: true})
       .then(function () {
         return db.Door.bulkCreate(doors, {validate: true, individualHooks: true})
           .then(function (records) {
@@ -23,12 +23,11 @@ describe('Doors', function() {
             }
           })
       })
-      .then(function () {
-        next()
-      })
-      .catch(function (err) {
-        throw err
-      })
+  })
+
+  afterEach(function (next) {
+    server.get('event bus').removeAllListeners()
+    next()
   })
 
   describe('GET /api/doors', function () {
@@ -85,7 +84,6 @@ describe('Doors', function() {
           assert.ifError(err)
 
           triggered.should.equal(true)
-
           done()
         })
 
@@ -159,9 +157,33 @@ describe('Doors', function() {
         })
     })
 
+    it('should not trigger event doors:updated', function (done) {
+      var noChange = doors[0].isOpen
+      var triggered = false
+
+      request(server)
+        .put('/api/doors/' + doors[0].id)
+        .set('Access-Key', 'qwerty')
+        .send({ isOpen: noChange })
+        .expect(200)
+        .end(function (err, res) {
+          assert.ifError(err)
+
+          triggered.should.equal(false)
+          done()
+        })
+
+      var eventBus = server.get('event bus')
+      eventBus.on(['doors', 'updated'], function (newDoor, oldDoor) {
+        console.log(arguments)
+        triggered = true
+      })
+    })
+
     it('should trigger event doors:updated', function (done) {
       var changedIsOpen = !doors[0].isOpen
       var triggered = false
+      var eventBus = server.get('event bus')
 
       request(server)
         .put('/api/doors/' + doors[0].id)
@@ -171,19 +193,23 @@ describe('Doors', function() {
         .end(function (err, res) {
           assert.ifError(err)
 
-
           triggered.should.equal(true)
           done()
         })
 
-      var eventBus = server.get('event bus')
-      eventBus.on(['doors', 'updated'], function (door) {
-        door.should.be.an.Object
-        door.should.have.property('id').and.equal(doors[0].id)
-        door.should.have.property('slug').and.equal(doors[0].slug)
-        door.should.have.property('name').and.equal(doors[0].name)
-        door.should.have.property('isOpen').and.not.equal(doors[0].isOpen)
-        door.should.have.property('isOpen').and.equal(changedIsOpen)
+      eventBus.on(['doors', 'updated'], function (newDoor, oldDoor) {
+        newDoor.should.be.an.Object
+        newDoor.should.have.property('id').and.equal(doors[0].id)
+        newDoor.should.have.property('slug').and.equal(doors[0].slug)
+        newDoor.should.have.property('name').and.equal(doors[0].name)
+        newDoor.should.have.property('isOpen').and.not.equal(doors[0].isOpen)
+        newDoor.should.have.property('isOpen').and.equal(changedIsOpen)
+
+        oldDoor.should.be.an.Object
+        oldDoor.should.have.property('id').and.equal(doors[0].id)
+        oldDoor.should.have.property('slug').and.equal(doors[0].slug)
+        oldDoor.should.have.property('name').and.equal(doors[0].name)
+        oldDoor.should.have.property('isOpen').and.equal(doors[0].isOpen)
 
         triggered = true
       })

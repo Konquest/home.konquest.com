@@ -12,10 +12,12 @@ exports.updated = function hookUpdated (req, res, next) {
   var keysOld = Object.keys(res.locals.door_old)
 
   var changedNew = keysNew.some(function (key) {
+    if (key === 'updatedAt' || key === 'createdAt') return false
     return res.locals.door[key] !== res.locals.door_old[key]  // True if field has changed
   })
 
   var changedOld = keysOld.some(function (key) {
+    if (key === 'updatedAt' || key === 'createdAt') return false
     return res.locals.door[key] !== res.locals.door_old[key]  // True if field has changed
   })
 
