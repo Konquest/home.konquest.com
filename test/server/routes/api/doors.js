@@ -159,7 +159,7 @@ describe('Doors', function() {
         })
     })
 
-    it('should trigger event doors:changed', function (done) {
+    it('should trigger event doors:updated', function (done) {
       var changedIsOpen = !doors[0].isOpen
       var triggered = false
 
@@ -177,7 +177,7 @@ describe('Doors', function() {
         })
 
       var eventBus = server.get('event bus')
-      eventBus.on(['doors', 'changed'], function (door) {
+      eventBus.on(['doors', 'updated'], function (door) {
         door.should.be.an.Object
         door.should.have.property('id').and.equal(doors[0].id)
         door.should.have.property('slug').and.equal(doors[0].slug)
@@ -195,7 +195,7 @@ describe('Doors', function() {
       request(server)
         .delete('/api/doors/' + doors[0].id)
         .set('Access-Key', 'qwerty')
-        .expect(200)
+        .expect(204)
         .end(function (err, res) {
           assert.ifError(err)
 
@@ -210,7 +210,7 @@ describe('Doors', function() {
       request(server)
         .delete('/api/doors/' + doors[1].id)
         .set('Access-Key', 'qwerty')
-        .expect(200)
+        .expect(204)
         .end(function (err, res) {
           assert.ifError(err)
 

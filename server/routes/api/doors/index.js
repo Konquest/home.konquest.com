@@ -33,6 +33,7 @@ function statusCreated (req, res, next) {
   next()
 }
 function renderEmpty (req, res, next) {
+  res.status(204)
   res.end()
 }
 
@@ -43,5 +44,5 @@ router.route('/')
   .post(doorController.create, hook.created, statusCreated, renderSingle)
 router.route('/:door')
   .get(doorController.show, renderSingle)
-  .put(doorController.update, hook.changed, renderSingle)
+  .put(doorController.update, hook.updated, renderSingle)
   .delete(doorController.delete, hook.deleted, renderEmpty)
