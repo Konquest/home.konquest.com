@@ -17,7 +17,7 @@ module.exports = function (sequelize, DataTypes) {
     },
 
     hooks: {
-      beforeValidate: function (instance, options, done) {
+      afterValidate: function (instance, options, done) {
         if (instance.isNewRecord || instance.changed('name')) {
           instance.slug = instance.slugify()
         }
