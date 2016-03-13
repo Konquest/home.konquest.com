@@ -12,6 +12,7 @@ var GarageDoorNotifier = module.exports = function (options) {
   this.options.slackUrl = options.slackUrl || 'https://hooks.slack.com/services/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'
   this.options.notification = '@kenneth: Garage door has been open for %(timeMin)s mins'
   this.dict = {}
+  this.startOpenTime = 0
 
   if (!this.options.slackUrl) {
     throw new Error('Missing slackUrl parameter.')
@@ -19,25 +20,22 @@ var GarageDoorNotifier = module.exports = function (options) {
 
   var self = this
   var eventBus = this.options.eventBus
-  eventBus.on(['doors', 'changed'], function (args) {
-    var door = args[0]
-    if (door.slug !== 'garage') {
+  eventBus.on(['doors', 'updated'], function (newDoor, oldDoor) {
+    if (newDoor.slug !== 'garage') {
       return
     }
 
-    var oldDoor = args[1]
-
-    if (!oldDoor.isOpen && door.isOpen) {
+    if (!oldDoor.isOpen && newDoor.isOpen) {
       // Door just opened
       self.startOpenTime = Date.now()
       self.timeout = setTimeout(self.notify.bind(self), self.options.nofityAfter)
-      self.dict = JSON.parse(JSON.stringify(door)) // Clone door
+      self.dict = JSON.parse(JSON.stringify(newDoor)) // Clone door
     }
-    var changedKeys = Object.keys(previous)
   })
 }
 
 GarageDoorNotifier.prototype.notify = function () {
+  var self = this
   this.dict.timeMin = Math.round((Date.now() - this.startOpenTime) / MINUTE)
   request
     .post(this.options.slackUrl)
@@ -49,6 +47,6 @@ GarageDoorNotifier.prototype.notify = function () {
     })
     .end(function (res) {
       // Ummm now what?
-      winston.info('Notified slack that door was open for ' + this.dict.timeMin + 'mins')
+      winston.info('Notified slack that door was open for ' + self.dict.timeMin + 'mins')
     })
 }
