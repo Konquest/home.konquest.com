@@ -131,6 +131,18 @@ describe('Doors', function() {
           done()
         })
     })
+
+    it('should 404', function (done) {
+      request(server)
+        .get('/api/doors/non-existant')
+        .set('Access-Key', 'qwerty')
+        .expect(404)
+        .end(function (err, res) {
+          assert.ifError(err)
+
+          done()
+        })
+    })
   })
 
   describe('PUT /api/doors/:door', function () {

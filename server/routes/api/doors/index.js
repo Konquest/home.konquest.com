@@ -26,6 +26,9 @@ function renderList (req, res, next) {
   }))
 }
 function renderSingle (req, res, next) {
+  if (!res.locals.door) {
+    return next()
+  }
   res.send(res.locals.door.toJSON())
 }
 function statusCreated (req, res, next) {
