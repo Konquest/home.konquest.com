@@ -1,4 +1,4 @@
-FROM node:4.2
+FROM mhart/alpine-node:4.4
 
 ADD . /usr/src/home
 WORKDIR /usr/src/home
