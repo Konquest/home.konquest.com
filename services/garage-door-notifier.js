@@ -27,9 +27,16 @@ var GarageDoorNotifier = module.exports = function (options) {
 
     if (!oldDoor.isOpen && newDoor.isOpen) {
       // Door just opened
+      winston.verbose('Garage door just opened.')
       self.startOpenTime = Date.now()
-      self.timeout = setTimeout(self.notify.bind(self), self.options.nofityAfter)
+      self.timeout = setTimeout(self.notify.bind(self), self.options.notifyAfter)
       self.dict = JSON.parse(JSON.stringify(newDoor)) // Clone door
+    }
+
+    if (oldDoor.isOpen && !newDoor.isOpen) {
+      // Door just closed
+      winston.verbose('Garage door just closed.')
+      clearTimeout(self.timeout)
     }
   })
 }
